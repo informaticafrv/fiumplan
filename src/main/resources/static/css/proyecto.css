@@ -1,0 +1,234 @@
+:root {
+    --primary: #2563eb;
+    --dark-txt: #0f172a;
+    --bg-app: #f8fafc;
+    --border-color: #e2e8f0;
+}
+
+body {
+    background-color: var(--bg-app);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding-bottom: 3rem;
+}
+
+.container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+
+.back-link {
+    display: inline-block; margin-bottom: 1rem; text-decoration: none;
+    color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.8rem;
+}
+.back-link:hover { color: var(--primary); }
+
+/* --- CABECERA (HERO) --- */
+/* En tu HTML usas .project-hero, así que definimos eso aquí */
+.project-hero {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border-left: 6px solid var(--primary); /* El borde azul lateral */
+    border-radius: 4px;
+}
+
+.project-title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; }
+.project-hero h1 { margin: 0; font-size: 2.5rem; color: var(--dark-txt); letter-spacing: -1px; }
+.hero-desc { font-size: 1.1rem; color: #475569; max-width: 70%; margin-top: 0.5rem; }
+
+/* BARRA DE PROGRESO */
+.progress-track {
+    background: #e2e8f0;
+    height: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+.progress-fill {
+    background: var(--primary);
+    height: 100%;
+    transition: width 0.6s ease;
+}
+
+/* --- BOTONES --- */
+/* En tu HTML usas .btn-action, no .btn */
+.btn-action {
+    padding: 0.8rem 1.5rem; 
+    background: #0f172a; 
+    color: white; 
+    text-decoration: none;
+    font-weight: 700; 
+    text-transform: uppercase; 
+    font-size: 0.9rem; 
+    border: none; 
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+}
+.btn-action:hover { background: var(--primary); }
+
+.btn-secondary { background: #e2e8f0; color: var(--dark-txt); }
+.btn-secondary:hover { background: #cbd5e1; }
+
+.btn-text-delete { color: #dc2626; text-decoration: none; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; }
+.btn-text-delete:hover { text-decoration: underline; }
+
+.btn-text-toggle {
+    background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; padding: 1rem 1.5rem; text-transform: uppercase; font-size: 0.85rem;
+}
+.btn-text-toggle:hover { text-decoration: underline; }
+
+/* --- SECCIÓN TAREAS --- */
+.tasks-section-header {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem; 
+    border-bottom: 2px solid var(--border-color); 
+    margin-bottom: 2rem;
+}
+.tasks-section-header h2 { 
+    margin: 0;
+    font-size: 1.8rem; 
+    color: var(--dark-txt); 
+}
+
+/* --- BLOQUE DE TAREA --- */
+/* En tu HTML usas .task-block, no .task-card */
+.task-block {
+    background: #fff; 
+    border: 1px solid var(--border-color); 
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+/* Estilo para tareas completadas */
+.task-completed .task-title {
+    text-decoration: line-through; 
+    color: #94a3b8; 
+}
+.task-completed { 
+    opacity: 0.8; 
+}
+
+.task-main-row {
+    padding: 1.5rem; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+.task-info { 
+    display: 
+    flex; align-items: center; 
+    gap: 1.5rem; 
+}
+
+.task-title { 
+    font-size: 1.2rem; 
+    font-weight: 700; 
+    color: var(--dark-txt); 
+}
+.priority-badge {
+    background: #f1f5f9; 
+    padding: 0.4rem 0.8rem; 
+    font-weight: 700; 
+    font-size: 0.8rem; 
+    text-transform: uppercase;
+}
+
+/* Checkbox grande */
+.auto-submit-check {
+    width: 24px; 
+    height: 24px; 
+    cursor: pointer; 
+    accent-color: var(--primary);
+}
+
+/* --- SUBTAREAS --- */
+.subtasks-container {
+    background: #f8fafc;
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+}
+.subtask-row {
+    display: flex; 
+    justify-content: space-between; 
+    padding: 0.8rem 0; 
+    border-bottom: 1px solid var(--border-color); 
+    font-size: 0.95rem;
+}
+.subtask-row:last-child { 
+    border-bottom: none; 
+}
+
+/* --- FORMULARIOS OCULTOS --- */
+.hidden-form-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease;
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Clase que añade JS para mostrar */
+.form-visible {
+    max-height: 200px; /* Altura suficiente */
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.form-inline-flex { display: flex; gap: 1rem; align-items: center; }
+.form-input { padding: 0.8rem; border: 2px solid var(--border-color); flex-grow: 1; }
+.form-input-sm { width: 80px; }
+.modal-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Fondo oscuro transparente */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+    max-width: 400px;
+}
+
+.modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-delete-confirm {
+    background: #dc2626;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.action-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+}
+
+.link-delete {
+    color: #dc2626;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    margin-left: 10px;
+}
+
+.link-delete:hover {
+    color: #991b1b;
+    text-decoration: underline;
+}

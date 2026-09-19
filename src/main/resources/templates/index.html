@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil</title>
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="brand">FiumPlan Panel</div>
+        <nav class="user-nav">
+            <ul>
+                <li><div th:if="${usuario.rol.name() == 'admin'}">
+                        <a href="/admin/dashboard" class="btn-action">PANEL ADMIN</a>
+                    </div></li>
+                <li style="display: flex; align-items: center; gap: 10px;">
+                    <img th:src="${usuario.imagenUrl}" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e2e8f0;">
+                    <span th:text="${usuario.nombre}"></span>
+                </li>
+                <li><a href="/logout">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="section-header">
+            <h2>Proyectos Activos</h2>
+            <a href="crearProyecto" class="btn-create-main">Crear Nuevo Proyecto</a>
+        </div>
+        <div style="margin-bottom: 2rem; display: flex; gap: 10px; max-width: 600px;">
+            <form action="/" method="get" style="display: flex; gap: 10px; flex-grow: 1;">
+                
+                <input type="text" name="buscar" th:value="${textoBusqueda}" 
+                    placeholder="Buscar proyecto por nombre" 
+                    style="padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 4px; flex-grow: 1; font-size: 1rem;">
+                
+                <button type="submit" class="btn-action" style="background: #0f172a; color: white; border-radius: 4px; cursor: pointer; padding: 0 1.5rem;">
+                     Buscar
+                </button>
+            </form>
+
+            <a th:if="${textoBusqueda != null}" href="/" class="btn-action" 
+            style="background: #dc2626; color: white; text-decoration: none; border-radius: 4px; display: flex; align-items: center; padding: 0 1.5rem;">
+                ✖ Limpiar
+            </a>
+        </div>
+                
+        <div class="projects-grid">
+            <div th:each="proyecto : ${listaProyectos}" class="project-panel">
+                
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <a th:href="@{/verProyecto(nombre=${proyecto.nombre})}" th:text="${proyecto.nombre}"></a>
+                    </h3>
+                </div>
+
+                <div class="panel-body">
+                    <p class="panel-desc" th:text="${proyecto.descripcion}"></p>
+                    
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>Completado</span>
+                            <span th:text="${#numbers.formatDecimal(proyecto.porcentajeCompletado, 0, 0)} + '%'"></span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" th:style="'width:' + ${proyecto.porcentajeCompletado} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-footer">
+                    <a th:href="@{/editarProyecto(id=${proyecto.id})}" class="action-link link-edit">Editar</a>
+                   <button class="action-link link-delete" 
+                            th:data-url="@{/borrarProyecto(id=${proyecto.id})}"
+                            onclick="confirmarBorrado(this.getAttribute('data-url'))">
+                        Borrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="modalConfirmar" class="modal-overlay">
+    <div class="modal-box">
+        <h3>¿Estás seguro?</h3>
+        <p>Esta acción eliminará el elemento permanentemente.</p>
+        <div class="modal-actions">
+            <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
+            <a id="btnConfirmarBorrado" href="#" class="btn-delete-confirm">Sí, borrar</a>
+        </div>
+    </div>
+</div>
+<script src="/js/scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+:root {
+    --primary: #2563eb; /* Azul más serio */
+    --bg-dark: #1e293b;
+    --text-light: #f8fafc;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-dark); /* Fondo oscuro */
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.login-container {
+    background: #ffffff;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    /* Sombra dura para efecto "bloque" */
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.2); 
+    border: 2px solid #000;
+}
+
+h1 {
+    text-align: left;
+    color: #000;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #334155;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+input {
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    border: 2px solid #cbd5e1;
+    background: #f1f5f9;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 1rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    background: var(--primary);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+}
+
+.link-register {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+}
+.link-register:hover { text-decoration: underline; color: var(--primary); }

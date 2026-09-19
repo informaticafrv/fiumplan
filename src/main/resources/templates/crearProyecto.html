@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Proyecto</title>
+    <link rel="stylesheet" href="css/crearProyecto.css">
+</head>
+<body>
+    <div class="container">
+       <h3 th:text="${proyecto.id != null} ? 'Editar Proyecto' : 'Nuevo Proyecto'"></h3>
+
+        <div th:if="${error}" class="error">
+            <span th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/guardarProyecto}" method="post">
+            <input type="hidden" name="id" th:value="${proyecto != null ? proyecto.id : ''}">
+            
+            <label for="nombre">Nombre del Proyecto</label>
+            <input type="text" name="nombre" required placeholder="Ej: Web Corporativa" th:value="${proyecto != null ? proyecto.nombre : ''}">
+            
+            <label for="descripcion">Descripción</label>
+            <textarea name="descripcion" required placeholder="Describe el objetivo del proyecto..." th:text="${proyecto != null ? proyecto.descripcion : ''}"></textarea>
+            
+            <div class="actions">
+                <a href="/" class="btn-cancel">Cancelar</a>
+                <input type="submit" value="Guardar Proyecto">
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin</title>
+    <link rel="stylesheet" href="/css/proyecto.css">
+    <style>
+        .admin-table { width: 100%; border-collapse: collapse; background: white; margin-top: 1rem; }
+        .admin-table th, .admin-table td { padding: 1rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .rol-badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Volver al Inicio</a>
+        
+        <div class="admin-header">
+            <h1>Panel de Administración</h1>
+            <a href="/admin/proyectos" class="btn-action">Ver TODOS los Proyectos</a>
+        </div>
+
+        <h2>Usuarios Registrados</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td th:text="${u.nombre}"></td>
+                    <td th:text="${u.email}"></td>
+                    <td><span class="rol-badge" th:text="${u.rol}"></span></td>
+                    <td>
+                        <a th:href="@{/admin/proyectos(usuarioId=${u.id})}" class="btn-action btn-secondary" style="font-size: 0.8rem;">
+                            Ver sus proyectos
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

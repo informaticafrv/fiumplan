@@ -1,0 +1,29 @@
+
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: fiumplan_db_docker
+    ports:
+      - "8080"
+    environment:
+      MYSQL_DATABASE: fiumplan_db
+      MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - mysql_data:/var/lib/mysql 
+
+  app:
+    build: .             
+    container_name: fiumplan_app_docker
+    ports:
+      - "8080:8080"      
+    depends_on:
+      - mysqldb          
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/fiumplan_db?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: toor
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  mysql_data: 

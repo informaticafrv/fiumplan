@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Proyectos</title>
+    <link rel="stylesheet" href="/css/proyecto.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/admin/dashboard" class="back-link">← Volver al Panel Admin</a>
+
+        <h1 th:text="${titulo}" style="margin-bottom: 2rem;"></h1>
+
+        <div th:if="${proyectos.empty}" style="padding: 2rem; background: white; text-align: center;">
+            <p>No hay proyectos para mostrar.</p>
+        </div>
+
+        <div th:each="p : ${proyectos}" class="task-block">
+            <div class="task-main-row">
+                <div class="task-info">
+                    <div>
+                        <div class="task-title" th:text="${p.nombre}"></div>
+                        <small th:text="${p.descripcion}" style="color: #64748b;"></small>
+                        <br>
+                        <small style="color: #2563eb; font-weight: bold;" th:text="'Usuario: ' + ${p.creador.nombre}"></small>
+                    </div>
+                </div>
+                
+                <button class="action-link link-delete" 
+                        th:data-url="@{/admin/borrarProyecto(id=${p.id})}"
+                        onclick="confirmarBorrado(this.getAttribute('data-url'))">
+                    BORRAR PROYECTO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfirmar" class="modal-overlay">
+        <div class="modal-box">
+            <h3>¿Borrar Proyecto?</h3>
+            <p>Esta acción eliminará el proyecto y todas sus tareas. <strong>No se puede deshacer.</strong></p>
+            <div class="modal-actions">
+                <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
+                <a id="btnConfirmarBorrado" href="#" class="btn-delete-confirm">Sí, borrar definitivamente</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

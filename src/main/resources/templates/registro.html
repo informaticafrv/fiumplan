@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - FiumPlan</title>
+    <link rel="stylesheet" href="/css/registro.css">
+</head>
+<body>
+    <form th:action="@{/insertarUsuario}" method="post" enctype="multipart/form-data">
+        <h1>Crear Cuenta</h1>
+        <p class="subtitle">Únete para gestionar tus proyectos</p>
+        
+        <div>
+            <label for="nombre">Usuario</label>
+            <input type="text" name="nombre" required 
+                   placeholder="Tu nombre (mín. 3 letras)" 
+                   minlength="3"
+                   title="El nombre debe tener al menos 3 letras.">
+        </div>
+        
+        <div>
+            <label for="email">Email</label>
+            <input type="email" name="email" required placeholder="correo@ejemplo.com">
+        </div>
+        <div th:if="${error}" style="background-color: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; text-align: center; border: 1px solid #fca5a5; font-weight: bold;">
+            <p th:text="${error}" style="margin: 0;"></p>
+        </div>
+        
+        <div>
+            <label for="password">Contraseña</label>
+            <input type="password" name="password" id="inputPass" required placeholder="••••••••">
+            <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display:block;">
+                Mínimo 8 caracteres, 1 número y 1 mayúscula.
+            </small>
+        </div>
+        
+        <div>
+            <label for="archivo">Foto de perfil (Opcional)</label>
+            <input type="file" name="archivo" accept="image/*">
+        </div>
+
+        <input type="submit" value="Registrarse">
+        
+        <div class="links">
+            <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </form>
+
+    <script>
+        const passInput = document.getElementById('inputPass');
+
+        passInput.addEventListener('input', function() {
+            const valor = this.value;
+           
+            const regexSegura = /^(?=.*\d)(?=.*[A-Z]).{8,}$/;
+
+            if (!regexSegura.test(valor)) {
+                this.setCustomValidity("La contraseña es débil: Necesita 8 caracteres, 1 número y 1 mayúscula.");
+            } else {
+                this.setCustomValidity("");
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            
+            const btn = this.querySelector('input[type="submit"]');
+            
+            if (btn.disabled) {
+                e.preventDefault();
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.value = 'Registrando...';
+        });
+    </script>
+</body>
+</html>
