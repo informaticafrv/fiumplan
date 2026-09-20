@@ -14,7 +14,7 @@
             <label for="nombre">Usuario</label>
             <input type="text" name="nombre" required 
                    placeholder="Tu nombre (mín. 3 letras)" 
-                   minlength="3"
+                   minlength="3" maxlength="100"
                    title="El nombre debe tener al menos 3 letras.">
         </div>
         
@@ -28,9 +28,9 @@
         
         <div>
             <label for="password">Contraseña</label>
-            <input type="password" name="password" id="inputPass" required placeholder="••••••••">
+            <input type="password" name="password" id="inputPass" required maxlength="72" placeholder="••••••••">
             <small style="color: #64748b; font-size: 0.8rem; margin-top: 4px; display:block;">
-                Mínimo 8 caracteres, 1 número y 1 mayúscula.
+                Entre 8 y 72 caracteres, con 1 número y 1 mayúscula.
             </small>
         </div>
         

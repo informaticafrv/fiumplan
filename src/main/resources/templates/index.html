@@ -17,12 +17,17 @@
                     <img th:src="${usuario.imagenUrl}" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e2e8f0;">
                     <span th:text="${usuario.nombre}"></span>
                 </li>
-                <li><a href="/logout">Cerrar Sesión</a></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" style="margin: 0;">
+                        <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                    </form>
+                </li>
             </ul>
         </nav>
     </header>
 
     <main class="container">
+        <div th:if="${error}" class="flash-error" th:text="${error}"></div>
         <div class="section-header">
             <h2>Proyectos Activos</h2>
             <a href="crearProyecto" class="btn-create-main">Crear Nuevo Proyecto</a>
@@ -50,7 +55,7 @@
                 
                 <div class="panel-header">
                     <h3 class="panel-title">
-                        <a th:href="@{/verProyecto(nombre=${proyecto.nombre})}" th:text="${proyecto.nombre}"></a>
+                        <a th:href="@{/verProyecto(id=${proyecto.id})}" th:text="${proyecto.nombre}"></a>
                     </h3>
                 </div>
 
@@ -79,16 +84,7 @@
             </div>
         </div>
     </main>
-    <div id="modalConfirmar" class="modal-overlay">
-    <div class="modal-box">
-        <h3>¿Estás seguro?</h3>
-        <p>Esta acción eliminará el elemento permanentemente.</p>
-        <div class="modal-actions">
-            <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
-            <a id="btnConfirmarBorrado" href="#" class="btn-delete-confirm">Sí, borrar</a>
-        </div>
-    </div>
-</div>
+    <div th:replace="~{fragments :: modalBorrado('¿Estás seguro?', 'Esta acción eliminará el proyecto y todas sus tareas permanentemente.')}"></div>
 <script src="/js/scripts.js"></script>
 </body>
 </html>

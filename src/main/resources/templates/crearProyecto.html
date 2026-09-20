@@ -17,10 +17,10 @@
             <input type="hidden" name="id" th:value="${proyecto != null ? proyecto.id : ''}">
             
             <label for="nombre">Nombre del Proyecto</label>
-            <input type="text" name="nombre" required placeholder="Ej: Web Corporativa" th:value="${proyecto != null ? proyecto.nombre : ''}">
+            <input type="text" name="nombre" required maxlength="255" placeholder="Ej: Web Corporativa" th:value="${proyecto != null ? proyecto.nombre : ''}">
             
             <label for="descripcion">Descripción</label>
-            <textarea name="descripcion" required placeholder="Describe el objetivo del proyecto..." th:text="${proyecto != null ? proyecto.descripcion : ''}"></textarea>
+            <textarea name="descripcion" required maxlength="1000" placeholder="Describe el objetivo del proyecto..." th:text="${proyecto != null ? proyecto.descripcion : ''}"></textarea>
             
             <div class="actions">
                 <a href="/" class="btn-cancel">Cancelar</a>

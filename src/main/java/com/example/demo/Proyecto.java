@@ -1,7 +1,6 @@
 package com.example.demo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
+// un usuario no puede tener dos proyectos con el mismo nombre (lo garantiza también la BD, no solo el código)
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "nombre"}))
 public class Proyecto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,11 +76,6 @@ public class Proyecto {
         tarea.setProyecto(this);
     }
 
-    public void eliminarTarea(Tarea tarea) {
-        tareas.remove(tarea);
-        tarea.setProyecto(null);
-    }
-
     public double getPorcentajeCompletado() {
 
         if(tareas.isEmpty()) return 0;
@@ -94,25 +90,16 @@ public class Proyecto {
         return (completadas / tareas.size()) *100;
     }
 
-    public List<Tarea> ordenarPorPrioridad() {
-
-            Collections.sort(tareas);
-
-        return tareas;
-    }
-
+    @JsonIgnore
     public List<TareaPrincipal> getSoloTareasPrincipales() {
-    List<TareaPrincipal> listaFiltrada = new ArrayList<>();
-    
-    if (this.tareas != null) {
+        List<TareaPrincipal> listaFiltrada = new ArrayList<>();
         for (Tarea t : this.tareas) {
-            if (t instanceof TareaPrincipal) {
-                listaFiltrada.add((TareaPrincipal) t);
+            if (t instanceof TareaPrincipal principal) {
+                listaFiltrada.add(principal);
             }
         }
+        return listaFiltrada;
     }
-    return listaFiltrada;
-}
 
     public Long getId() {
         return id;

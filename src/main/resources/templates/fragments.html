@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Modal de confirmación de borrado, compartido por todas las páginas.
+         El JS (confirmarBorrado) pone en el formulario la URL a la que enviar el POST. -->
+    <div th:fragment="modalBorrado(titulo, texto)" id="modalConfirmar" class="modal-overlay">
+        <div class="modal-box">
+            <h3 th:text="${titulo}"></h3>
+            <p th:text="${texto}"></p>
+            <div class="modal-actions">
+                <button type="button" onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
+                <form id="formBorrado" method="post" th:action="@{/}">
+                    <button type="submit" class="btn-delete-confirm">Sí, borrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

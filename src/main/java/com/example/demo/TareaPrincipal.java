@@ -2,6 +2,7 @@ package com.example.demo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -15,8 +16,8 @@ public class TareaPrincipal extends Tarea{
 
     public TareaPrincipal(){}
     
-    public TareaPrincipal(String titulo, String description, boolean estado, int prioridad, LocalDate fechaCreacion) {
-        super(titulo, description, estado, prioridad, fechaCreacion);
+    public TareaPrincipal(String titulo, String descripcion, boolean estado, int prioridad, LocalDate fechaCreacion) {
+        super(titulo, descripcion, estado, prioridad, fechaCreacion);
     }
     public List<TareaSecundaria> getTareasSecundarias() {
         return tareasSecundarias;
@@ -31,13 +32,11 @@ public class TareaPrincipal extends Tarea{
     public void eliminarSubtarea(TareaSecundaria tarea){
         tareasSecundarias.remove(tarea);
     }
-    public boolean tareasCompletadas(){
-        for (TareaSecundaria tarea : tareasSecundarias) {
-            if(!tarea.isEstado()){
-                return false;
-            }
-        }
-        return true;
+    // copia ordenada (mayor prioridad primero); no modifica la lista real de la entidad
+    public List<TareaSecundaria> getSubtareasPorPrioridad() {
+        List<TareaSecundaria> copia = new ArrayList<>(tareasSecundarias);
+        copia.sort(Comparator.comparingInt(TareaSecundaria::getPrioridad).reversed());
+        return copia;
     }
     
 }

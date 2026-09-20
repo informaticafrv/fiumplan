@@ -9,14 +9,16 @@ import jakarta.persistence.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_tarea")
-public class Tarea implements Comparable<Tarea> {
+public class Tarea {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String titulo;
-    private String description;
+    // el campo se llama descripcion en Java pero mantiene la columna "description" para no romper la BD existente
+    @Column(name = "description")
+    private String descripcion;
     private boolean estado;
     private int prioridad;
     private LocalDate fechaCreacion;
@@ -28,9 +30,9 @@ public class Tarea implements Comparable<Tarea> {
     
     public Tarea(){}
 
-    public Tarea(String titulo, String description, boolean estado, int prioridad, LocalDate fechaCreacion) {
+    public Tarea(String titulo, String descripcion, boolean estado, int prioridad, LocalDate fechaCreacion) {
         this.titulo = titulo;
-        this.description = description;
+        this.descripcion = descripcion;
         this.estado = estado;
         this.prioridad = prioridad;
         this.fechaCreacion = fechaCreacion;
@@ -44,12 +46,12 @@ public class Tarea implements Comparable<Tarea> {
         this.titulo = titulo;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public boolean isEstado() {
@@ -90,25 +92,10 @@ public class Tarea implements Comparable<Tarea> {
         this.id = id;
     }
 
-    public void marcarDesmarcar() {
-        if (this.estado) {
-            this.estado = false;
-        } else {
-            this.estado = true;
-        }
-    }
-
     @Override
     public String toString() {
-        return "Tarea: titulo: " + titulo + ", description: " + description + ", estado: " + estado + ", prioridad: "
+        return "Tarea: titulo: " + titulo + ", descripcion: " + descripcion + ", estado: " + estado + ", prioridad: "
                 + prioridad + ", fechaCreacion: " + fechaCreacion;
-    }
-
-    @Override
-    public int compareTo(Tarea o) {
-       if (this.prioridad < o.prioridad) return -1;
-        if (this.prioridad > o.prioridad) return 1;
-        return 0;
     }
 
 }

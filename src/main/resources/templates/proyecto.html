@@ -31,28 +31,30 @@
             </div>
         </header>
 
+        <div th:if="${error}" class="flash-error" th:text="${error}"></div>
+
         <section>
             <div class="tasks-section-header">
                 <h2>Tareas</h2>
                 <div style="display: flex; gap: 1rem;">
-                     <a th:href="@{/proyecto/ordenarPrioridad(nombre=${proyecto.nombre})}" class="btn-action btn-secondary" style="font-size: 0.8rem;">Ordenar por Prioridad</a>
+                     <a th:href="@{/verProyecto(id=${proyecto.id}, orden='prioridad')}" class="btn-action btn-secondary" style="font-size: 0.8rem;">Ordenar por Prioridad</a>
                     <button class="btn-action btn-toggle-form" data-target="mainTaskForm">+ Nueva Tarea</button>
                 </div>
             </div>
             
             <div id="mainTaskForm" class="hidden-form-container">
-                <form th:action="@{/insertarTareaPrincipal}" method="get" class="form-inline-flex">
+                <form th:action="@{/insertarTareaPrincipal}" method="post" class="form-inline-flex">
                     <input type="hidden" name="idProyecto" th:value="${proyecto.id}">
                     <input type="text" name="titulo" class="form-input" placeholder="Título" required>
                     <input type="text" name="descripcion" class="form-input" placeholder="Descripción" required>
-                    <input type="number" name="prioridad" class="form-input form-input-sm" placeholder="Prio" value="1" min="1" required>
+                    <input type="number" name="prioridad" class="form-input form-input-sm" placeholder="Prio" value="1" min="1" max="10" required>
                     <input type="submit" value="Añadir" class="btn-action">
                 </form>
             </div>
-            <div th:each="tarea : ${proyecto.soloTareasPrincipales}" class="task-block" th:classappend="${tarea.estado} ? 'task-completed' : ''">
+            <div th:each="tarea : ${tareasPrincipales}" class="task-block" th:classappend="${tarea.estado} ? 'task-completed' : ''">
                 <div class="task-main-row">
                     <div class="task-info">
-                        <form th:action="@{/cambiarEstadoTarea}" method="get">
+                        <form th:action="@{/cambiarEstadoTarea}" method="post">
                             <input type="hidden" name="idTarea" th:value="${tarea.id}">
                             
                             <input type="checkbox" name="estado" value="true" 
@@ -62,14 +64,14 @@
                         
                         <div>
                             <div class="task-title" th:text="${tarea.titulo}"></div>
-                            <small th:text="${tarea.description}" style="color: #64748b;"></small>
+                            <small th:text="${tarea.descripcion}" style="color: #64748b;"></small>
                         </div>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 1.5rem;">
                         <span class="priority-badge">Prioridad <span th:text="${tarea.prioridad}"></span></span>
                        <button class="action-link link-delete" 
-                                th:data-url="@{/borrarTarea(id=${tarea.id}, nombreProyecto=${proyecto.nombre})}"
+                                th:data-url="@{/borrarTarea(id=${tarea.id})}"
                                 onclick="confirmarBorrado(this.getAttribute('data-url'))">
                             Borrar
                         </button>
@@ -77,14 +79,14 @@
                 </div>
 
                 <div class="subtasks-container">
-                    <div th:each="sub : ${tarea.tareasSecundarias}" class="subtask-row">
+                    <div th:each="sub : ${porPrioridad ? tarea.subtareasPorPrioridad : tarea.tareasSecundarias}" class="subtask-row">
                         <div style="display: flex; gap: 10px; align-items: center;">
                              <span style="color: #cbd5e1;">↳</span>
                              <span th:text="${sub.titulo}" style="font-weight: 500;"></span>
-                             <small style="color: #94a3b8;" th:text="'(' + ${sub.description} + ')'"></small>
+                             <small style="color: #94a3b8;" th:text="'(' + ${sub.descripcion} + ')'"></small>
                         </div>
                         <button class="action-link link-delete" 
-                                th:data-url="@{/borrarTarea(id=${sub.id}, nombreProyecto=${proyecto.nombre})}"
+                                th:data-url="@{/borrarTarea(id=${sub.id})}"
                                 onclick="confirmarBorrado(this.getAttribute('data-url'))">
                             Borrar
                         </button>
@@ -94,12 +96,12 @@
                     
                     <div th:id="${'subForm-' + tarea.id}" class="hidden-form-container" style="background: #fff;">
      
-                        <form th:action="@{/insertarTareaSecundaria}" method="get" class="form-inline-flex">
+                        <form th:action="@{/insertarTareaSecundaria}" method="post" class="form-inline-flex">
                             <input type="hidden" name="idProyecto" th:value="${proyecto.id}">
                             <input type="hidden" name="idTareaPadre" th:value="${tarea.id}">
                             <input type="text" name="tituloSecundaria" class="form-input" placeholder="Título" required>
                             <input type="text" name="descripcion" class="form-input" placeholder="Descripción" required>
-                            <input type="number" name="prioridad" class="form-input form-input-sm" value="1" required>
+                            <input type="number" name="prioridad" class="form-input form-input-sm" value="1" min="1" max="10" required>
                             <input type="text" name="categoria" class="form-input form-input-sm" placeholder="Cat.">
                             <input type="submit" value="Guardar" class="btn-action btn-secondary">
                         </form>
@@ -108,16 +110,7 @@
             </div>
         </section>
     </div>
-    <div id="modalConfirmar" class="modal-overlay">
-    <div class="modal-box">
-        <h3>¿Estás seguro?</h3>
-        <p>Esta acción eliminará el elemento permanentemente.</p>
-        <div class="modal-actions">
-            <button onclick="cerrarModal()" class="btn-cancel">Cancelar</button>
-            <a id="btnConfirmarBorrado" href="#" class="btn-delete-confirm">Sí, borrar</a>
-        </div>
-    </div>
-</div>
+    <div th:replace="~{fragments :: modalBorrado('¿Estás seguro?', 'Esta acción eliminará el elemento permanentemente.')}"></div>
     <script src="/js/scripts.js"></script>
 </body>
 </html>

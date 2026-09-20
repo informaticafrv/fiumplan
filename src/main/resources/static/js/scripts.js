@@ -31,10 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 function confirmarBorrado(url) {
     const modal = document.getElementById('modalConfirmar');
-    const btnConfirmar = document.getElementById('btnConfirmarBorrado');
-    
-    // Asignamos la URL de borrado al botón "Sí" del modal
-    btnConfirmar.href = url;
+
+    // El borrado se envía por POST (con el token CSRF que ya lleva el formulario del modal)
+    document.getElementById('formBorrado').action = url;
     
     // Mostramos el modal
     modal.style.display = 'flex';

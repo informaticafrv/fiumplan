@@ -1,106 +1,50 @@
 package com.example.demo;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.security.core.Authentication;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Pantallas de proyectos y tareas. Todo lo que modifica datos es POST (con token CSRF)
+ * y se identifica por id; las comprobaciones de propiedad viven en ProyectoService.
+ */
 @Controller
-public class ProyectoControler {
+public class ProyectoController {
 
-    @Autowired
-    private PdfService pdfService;
+    private final ProyectoService proyectoService;
+    private final UsuarioService usuarioService;
+    private final PdfService pdfService;
 
-    @Autowired
-    private TareaRepository tareaRepository;
+    public ProyectoController(ProyectoService proyectoService, UsuarioService usuarioService, PdfService pdfService) {
+        this.proyectoService = proyectoService;
+        this.usuarioService = usuarioService;
+        this.pdfService = pdfService;
+    }
 
-    @Autowired
-    private ProyectoRepository proyectoRepository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-    
     @GetMapping("/")
-    public String mostrarInicio(Model model, Authentication authentication, @RequestParam(name = "buscar", required = false) String buscar) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
+    public String mostrarInicio(Model model, Authentication authentication,
+                                @RequestParam(name = "buscar", required = false) String buscar) {
+        Usuario usuario = usuarioService.actual(authentication);
+
+        if (buscar != null && !buscar.isBlank()) {
+            // dejamos la palabra buscada escrita en la barra de búsqueda
+            model.addAttribute("textoBusqueda", buscar);
         }
-        // 1. Obtenemos el email del usuario logueado desde Spring Security
-        String email = authentication.getName();
-
-        // 2. Buscamos el objeto Usuario completo en la base de datos
-        Usuario usuario = usuarioRepository.findByEmail(email);
-
-        // 3. Buscamos sus proyectos
-        List<Proyecto> proyectos;
-
-    // 👇 LÓGICA DEL BUSCADOR 👇
-    if (buscar != null && !buscar.trim().isEmpty()) {
-        // Si el usuario ha escrito algo, buscamos por ese patrón
-        proyectos = proyectoRepository.findByNombreContainingIgnoreCaseAndCreador(buscar, usuario);
-        // Guardamos la palabra buscada para dejarla escrita en la barra de búsqueda visualmente
-        model.addAttribute("textoBusqueda", buscar); 
-    } else {
-        // Si no ha buscado nada, mostramos todos sus proyectos normalmente
-        proyectos = proyectoRepository.findByCreador(usuario);
-    }
-
-        model.addAttribute("listaProyectos", proyectos);
-        // También pasamos el usuario a la vista por si quieres mostrar su nombre o foto
-        model.addAttribute("usuario", usuario); 
-        
+        model.addAttribute("listaProyectos", proyectoService.listar(usuario, buscar));
+        model.addAttribute("usuario", usuario);
         return "index";
-    }
-    
-   @PostMapping("/guardarProyecto")
-    public String guardarProyecto(@RequestParam(name="id", required=false) Long id,
-                                  @RequestParam("nombre") String nombre, 
-                                  @RequestParam("descripcion") String descripcion, 
-                                  Authentication authentication,
-                                  Model model) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email);
-        if (usuario == null) return "redirect:/login";
-        Proyecto proyectoExistente = proyectoRepository.findByNombreAndCreador(nombre, usuario);
-        if (proyectoExistente != null) {
-            if (id == null || !proyectoExistente.getId().equals(id)) {
-                model.addAttribute("error", "Ya tienes un proyecto llamado '" + nombre + "'. Elige otro nombre.");
-                Proyecto proyectoFallido = new Proyecto(nombre, descripcion, usuario);
-                if (id != null) proyectoFallido.setId(id);
-                
-                model.addAttribute("proyecto", proyectoFallido);
-                
-                return "crearProyecto";
-            }
-        }
-        Proyecto proyecto;
-
-        if (id != null) {
-            // EDICIÓN
-            proyecto = proyectoRepository.findById(id).orElse(null);
-            if (proyecto != null) {
-                if (proyecto.getCreador().getId().equals(usuario.getId())) {
-                    proyecto.setNombre(nombre);
-                    proyecto.setDescripcion(descripcion);
-                } else {
-                    return "redirect:/?error=No tienes permiso";
-                }
-            } else {
-                return "redirect:/";
-            }
-        } else {
-            proyecto = new Proyecto(nombre, descripcion, usuario);
-        }
-        proyectoRepository.save(proyecto);
-        return "redirect:/";
     }
 
     @GetMapping("/crearProyecto")
@@ -108,147 +52,117 @@ public class ProyectoControler {
         model.addAttribute("proyecto", new Proyecto());
         return "crearProyecto";
     }
-    
-    @GetMapping("/verProyecto")
-    public String verProyecto(@RequestParam String nombre, Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email);
-        Proyecto proyecto = proyectoRepository.findByNombreAndCreador(nombre, usuario);
-        if (proyecto != null) {
-            model.addAttribute("proyecto", proyecto);
-            return "proyecto";
-        } else {
-            return "redirect:/?error=No se encuentra el proyecto";
-        }
-    }
-    @RequestMapping("/insertarTareaPrincipal")
-    public String insertarTareaPrincipal(@RequestParam("idProyecto") Long idProyecto, 
-                                         @RequestParam("titulo") String titulo, 
-                                         @RequestParam("descripcion") String descripcion, 
-                                         @RequestParam("prioridad") int prioridad) {
-        Proyecto proyecto = proyectoRepository.findById(idProyecto).orElse(null);
 
-        if (proyecto != null) {
-            TareaPrincipal tareaPrincipal = new TareaPrincipal(titulo, descripcion, false, prioridad, LocalDate.now());
-            tareaPrincipal.setProyecto(proyecto); 
-            proyecto.insertarTarea(tareaPrincipal);
-            proyectoRepository.save(proyecto);
-            return "redirect:/verProyecto?nombre=" + proyecto.getNombre();
-        }
-        
-        return "redirect:/";
-    }
-
-    @GetMapping("/insertarTareaSecundaria")
-    public String insertarTareaSecundaria(@RequestParam Long idProyecto,
-                                          @RequestParam Long idTareaPadre, 
-                                          @RequestParam String tituloSecundaria, 
-                                          @RequestParam String descripcion, 
-                                          @RequestParam int prioridad,
-                                          @RequestParam String categoria) {
-        
-        Proyecto proyecto = proyectoRepository.findById(idProyecto).orElse(null);
-        Tarea tareaPosiblePadre = tareaRepository.findById(idTareaPadre).orElse(null);
-        if (proyecto != null && tareaPosiblePadre instanceof TareaPrincipal) {
-            TareaPrincipal tareaPadre = (TareaPrincipal) tareaPosiblePadre;
-
-            TareaSecundaria subtarea = new TareaSecundaria(); 
-            subtarea.setTitulo(tituloSecundaria);
-            subtarea.setDescription(descripcion);
-            subtarea.setPrioridad(prioridad);
-            subtarea.setCategoria(categoria);
-            subtarea.setEstado(false);
-            subtarea.setFechaCreacion(java.time.LocalDate.now());
-
-            if (tareaPadre.isEstado()) {
-                tareaPadre.setEstado(false); 
-                // Guardamos el padre con el nuevo estado
-                tareaRepository.save(tareaPadre);
-            }
-            
-            subtarea.setProyecto(proyecto);
-            subtarea.setTareaPadre(tareaPadre); 
-            
-            tareaRepository.save(subtarea);
-            
-            return "redirect:/verProyecto?nombre=" + proyecto.getNombre();
-        }
-        
-        return "redirect:/";
-    }
-    
-    @GetMapping("/proyecto/ordenarPrioridad")
-    public String ordenarTareasPorPrioridad (@RequestParam("nombre") String nombreProyecto, Model model) {
-        Proyecto proyecto = proyectoRepository.findByNombre(nombreProyecto);
-        if(proyecto != null){
-            proyecto.getTareas().sort((t2, t1) -> t1.getPrioridad() - t2.getPrioridad());
-
-            for (Tarea t  : proyecto.getTareas()) {
-                if(t instanceof TareaPrincipal tareaPrincipal){
-                    tareaPrincipal.getTareasSecundarias().sort((s2, s1) -> s1.getPrioridad() - s2.getPrioridad());
-                }
-            }
-            model.addAttribute("proyecto", proyecto);
-            return "proyecto";
-        }else{
-            return "redirect:/";
-        }
-    }
-    @GetMapping("/cambiarEstadoTarea")
-    public String cambiarEstadoTarea(@RequestParam("idTarea") Long idTarea, 
-                                     @RequestParam(value = "estado", required = false) Boolean estado) {
-        
-        Tarea tarea = tareaRepository.findById(idTarea).orElse(null);
-        
-        if (tarea != null) {
-            boolean nuevoEstado = (estado != null);
-            tarea.setEstado(nuevoEstado);
-            if (tarea instanceof TareaPrincipal) {
-                TareaPrincipal principal = (TareaPrincipal) tarea;
-                if (principal.getTareasSecundarias() != null) {
-                    for (TareaSecundaria sub : principal.getTareasSecundarias()) {
-                        sub.setEstado(nuevoEstado);
-                    }
-                }
-            }
-            tareaRepository.save(tarea);
-            
-            String nombreProyecto = tarea.getProyecto().getNombre();
-            return "redirect:/verProyecto?nombre=" + nombreProyecto;
-        }
-        
-        return "redirect:/";
-    }
-    @GetMapping("/borrarProyecto")
-    public String borrarProyecto(@RequestParam("id") Long id) {
-        proyectoRepository.deleteById(id);
-        return "redirect:/";
-    }
     @GetMapping("/editarProyecto")
-    public String editarProyecto(@RequestParam("id") Long id, Model model) {
-        Proyecto proyecto = proyectoRepository.findById(id).orElse(null);
-        model.addAttribute("proyecto", proyecto);
+    public String editarProyecto(@RequestParam("id") Long id, Model model, Authentication authentication) {
+        Usuario usuario = usuarioService.actual(authentication);
+        model.addAttribute("proyecto", proyectoService.obtenerPropio(id, usuario));
         return "crearProyecto";
     }
 
-    @GetMapping("/borrarTarea")
-        public String borrarTarea(@RequestParam("id") Long id, @RequestParam("nombreProyecto") String nombreProyecto) {
-            tareaRepository.deleteById(id);
-            return "redirect:/verProyecto?nombre=" + nombreProyecto;
-        }
-    @GetMapping("/descargarPdf")
-    public void descargarPdf(@RequestParam("id") Long id, jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
-        Proyecto proyecto = proyectoRepository.findById(id).orElse(null);
-        
-        if(proyecto != null){
-            response.setContentType("application/pdf");
-            // Esta línea hace que el navegador te pregunte dónde guardar el archivo
-            String headerKey = "Content-Disposition";
-            String headerValue = "attachment; filename=proyecto_" + proyecto.getNombre() + ".pdf";
-            response.setHeader(headerKey, headerValue);
-            
-            pdfService.exportarProyecto(response, proyecto);
+    @PostMapping("/guardarProyecto")
+    public String guardarProyecto(@RequestParam(name = "id", required = false) Long id,
+                                  @RequestParam("nombre") String nombre,
+                                  @RequestParam("descripcion") String descripcion,
+                                  Authentication authentication,
+                                  Model model) {
+        Usuario usuario = usuarioService.actual(authentication);
+        try {
+            proyectoService.guardar(id, nombre, descripcion, usuario);
+            return "redirect:/";
+        } catch (IllegalArgumentException e) {
+            // devolvemos el formulario con lo que el usuario había escrito y el motivo del error
+            Proyecto proyectoFallido = new Proyecto(nombre, descripcion, usuario);
+            proyectoFallido.setId(id);
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("proyecto", proyectoFallido);
+            return "crearProyecto";
         }
     }
 
+    @GetMapping("/verProyecto")
+    public String verProyecto(@RequestParam("id") Long id,
+                              @RequestParam(name = "orden", required = false) String orden,
+                              Model model, Authentication authentication) {
+        Usuario usuario = usuarioService.actual(authentication);
+        Proyecto proyecto = proyectoService.obtenerPropio(id, usuario);
+        boolean porPrioridad = "prioridad".equals(orden);
+
+        model.addAttribute("proyecto", proyecto);
+        model.addAttribute("tareasPrincipales", proyectoService.tareasPrincipales(proyecto, porPrioridad));
+        model.addAttribute("porPrioridad", porPrioridad);
+        return "proyecto";
+    }
+
+    @PostMapping("/borrarProyecto")
+    public String borrarProyecto(@RequestParam("id") Long id, Authentication authentication) {
+        proyectoService.borrar(id, usuarioService.actual(authentication));
+        return "redirect:/";
+    }
+
+    @PostMapping("/insertarTareaPrincipal")
+    public String insertarTareaPrincipal(@RequestParam("idProyecto") Long idProyecto,
+                                         @RequestParam("titulo") String titulo,
+                                         @RequestParam("descripcion") String descripcion,
+                                         @RequestParam("prioridad") int prioridad,
+                                         Authentication authentication,
+                                         RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioService.actual(authentication);
+        try {
+            proyectoService.crearTareaPrincipal(idProyecto, titulo, descripcion, prioridad, usuario);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return volverAlProyecto(idProyecto);
+    }
+
+    @PostMapping("/insertarTareaSecundaria")
+    public String insertarTareaSecundaria(@RequestParam("idProyecto") Long idProyecto,
+                                          @RequestParam("idTareaPadre") Long idTareaPadre,
+                                          @RequestParam("tituloSecundaria") String titulo,
+                                          @RequestParam("descripcion") String descripcion,
+                                          @RequestParam("prioridad") int prioridad,
+                                          @RequestParam(name = "categoria", required = false) String categoria,
+                                          Authentication authentication,
+                                          RedirectAttributes redirectAttributes) {
+        Usuario usuario = usuarioService.actual(authentication);
+        try {
+            proyectoService.crearTareaSecundaria(idTareaPadre, titulo, descripcion, prioridad, categoria, usuario);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return volverAlProyecto(idProyecto);
+    }
+
+    @PostMapping("/cambiarEstadoTarea")
+    public String cambiarEstadoTarea(@RequestParam("idTarea") Long idTarea,
+                                     // un checkbox desmarcado no envía el parámetro: ausente = false
+                                     @RequestParam(name = "estado", required = false) Boolean estado,
+                                     Authentication authentication) {
+        Long idProyecto = proyectoService.cambiarEstado(idTarea, estado != null, usuarioService.actual(authentication));
+        return volverAlProyecto(idProyecto);
+    }
+
+    @PostMapping("/borrarTarea")
+    public String borrarTarea(@RequestParam("id") Long id, Authentication authentication) {
+        Long idProyecto = proyectoService.borrarTarea(id, usuarioService.actual(authentication));
+        return volverAlProyecto(idProyecto);
+    }
+
+    @GetMapping("/descargarPdf")
+    public void descargarPdf(@RequestParam("id") Long id, Authentication authentication,
+                             HttpServletResponse response) throws IOException {
+        Proyecto proyecto = proyectoService.obtenerPropio(id, usuarioService.actual(authentication));
+
+        response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+        // ContentDisposition escapa/codifica el nombre (tildes, comillas...) para que no rompa la cabecera
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                .filename("proyecto_" + proyecto.getNombre() + ".pdf", StandardCharsets.UTF_8)
+                .build().toString());
+        pdfService.exportarProyecto(response, proyecto);
+    }
+
+    private String volverAlProyecto(Long idProyecto) {
+        return "redirect:/verProyecto?id=" + idProyecto;
+    }
 }

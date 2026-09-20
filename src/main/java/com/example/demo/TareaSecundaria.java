@@ -19,8 +19,8 @@ public class TareaSecundaria extends Tarea {
 
     public TareaSecundaria(){}
 
-    public TareaSecundaria(String categoria, String titulo, String description, boolean estado, int prioridad, LocalDate fechaCreacion) {
-        super(titulo, description, estado, prioridad, fechaCreacion);
+    public TareaSecundaria(String categoria, String titulo, String descripcion, boolean estado, int prioridad, LocalDate fechaCreacion) {
+        super(titulo, descripcion, estado, prioridad, fechaCreacion);
         this.categoria = categoria;
     }
 
